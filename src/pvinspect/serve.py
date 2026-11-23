@@ -123,7 +123,7 @@ def _predict(state: dict, img_bytes: bytes) -> dict:
 
     model = state["model"]
     with _LOCK:
-        r = model.predict(gray, imgsz=224, device=state["device"] or None, verbose=False)[0]
+        r = model.predict(gray, imgsz=224, device=state["device"], verbose=False)[0]
     probs = r.probs.data.cpu().numpy()
     names = [model.names[i] for i in range(len(model.names))] if isinstance(model.names, dict) \
         else list(model.names)
@@ -135,8 +135,8 @@ def _predict(state: dict, img_bytes: bytes) -> dict:
         gcam = state.get("gcam")
         if gcam is not None:
             with _LOCK:
-                x = preprocess(gray, 224)
-                cam, _, _ = gcam(x.to(state["device"]) if state["device"] else x, idx)
+                x = preprocess(gray, 224).to(state["device"])
+                cam, _, _ = gcam(x, idx)
             rgb = overlay(gray, cam)
             buf = io.BytesIO()
             Image.fromarray(rgb).save(buf, format="PNG")
@@ -176,7 +176,7 @@ def make_handler(state: dict):
                 body = json.dumps({
                     "ok": True,
                     "weights": str(state.get("weights", "")),
-                    "device": state.get("device") or "cpu",
+                    "device": state.get("device_label") or "cpu",
                     "classes": state.get("classes", []),
                 }, ensure_ascii=False).encode("utf-8")
                 self._send(200, body, "application/json; charset=utf-8")
@@ -222,6 +222,19 @@ def _extract_file(raw: bytes, ctype: str) -> bytes | None:
     return None
 
 
+def _actual_device(explicit: str) -> str:
+    """页面上要显示真实推理设备，不能只显示配置里的空字符串。"""
+    if explicit:
+        return explicit
+    try:
+        import torch
+        if torch.cuda.is_available():
+            return f"cuda · {torch.cuda.get_device_name(0)}"
+    except Exception:
+        pass
+    return "cpu"
+
+
 def run(weights: Path | None = None, host: str = "127.0.0.1", port: int = 8000,
         device: str = "") -> None:
     from .cam import GradCAM
@@ -239,10 +252,16 @@ def run(weights: Path | None = None, host: str = "127.0.0.1", port: int = 8000,
         raise FileNotFoundError(f"找不到权重 {weights}，先运行 train")
 
     model = _load_model(weights, device)
+    # 推理设备与 CAM 设备必须一致：predict 走 ultralytics，CAM 走原生 torch 前向，
+    # 两边若不同（一个 CUDA 一个 CPU）会在 CAM 前向时报张量设备不匹配。
+    import torch as _torch
+    dev = device or ("cuda" if _torch.cuda.is_available() else "cpu")
+    model.model.to(dev)
     state = {
         "model": model,
         "weights": str(weights),
-        "device": device,
+        "device": dev,                          # predict 与 CAM 共用
+        "device_label": _actual_device(device),
         "classes": list(model.names.values()) if isinstance(model.names, dict) else list(model.names),
     }
     try:
