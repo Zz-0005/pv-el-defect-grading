@@ -1,0 +1,17 @@
+# 生成物（可用脚本重建）
+artifacts/
+data/
+.tmp/
+*.log
+
+# 环境
+.venv/
+__pycache__/
+*.pyc
+*.egg-info/
+build/
+dist/
+
+# 系统
+.DS_Store
+Thumbs.db

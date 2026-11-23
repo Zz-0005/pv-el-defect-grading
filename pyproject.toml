@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pv-inspect"
+version = "1.0.0"
+description = "光伏电池片 EL 图像缺陷分级：YOLOv8-cls + 分组切分 + Grad-CAM 定位"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "AI 机器视觉工程师订单班" }]
+dependencies = [
+    "numpy>=1.24",
+    "pillow>=10.0",
+    "torch>=2.0",
+    "torchvision>=0.15",
+    "ultralytics>=8.2",
+    "matplotlib>=3.7",
+]
+
+[project.scripts]
+pv = "pvinspect.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["pvinspect*"]
