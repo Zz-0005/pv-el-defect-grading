@@ -4,6 +4,11 @@ data/
 .tmp/
 *.log
 
+# 预训练权重：ultralytics 会自动下载，不必进版本库
+# （训练产出的 best.pt/last.pt 在 artifacts/ 下，已被忽略）
+yolov8*-cls.pt
+*.pt
+
 # 环境
 .venv/
 __pycache__/
