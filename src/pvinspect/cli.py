@@ -108,7 +108,8 @@ def cmd_eval(args) -> int:
 def cmd_serve(args) -> int:
     from . import serve
     w = Path(args.weights) if args.weights else None
-    serve.run(w, host=args.host, port=args.port, device=args.device or "")
+    serve.run(w, host=args.host, port=args.port, device=args.device or "",
+              open_browser=args.open)
     return 0
 
 
@@ -139,11 +140,13 @@ def main(argv: list[str] | None = None) -> int:
     s.add_argument("--only", default="", help="逗号分隔的实验名")
     s.set_defaults(func=cmd_eval)
 
-    s = sub.add_parser("serve", help="启动本地演示服务")
+    s = sub.add_parser("serve", help="启动本地演示服务（支持批量检测）")
     s.add_argument("--weights", default="")
     s.add_argument("--host", default="127.0.0.1")
-    s.add_argument("--port", type=int, default=8000)
+    s.add_argument("--port", type=int, default=8000,
+                   help="0 = 让系统分配空闲端口（端口被占用时用这个）")
     s.add_argument("--device", default="")
+    s.add_argument("--open", action="store_true", help="启动后自动打开浏览器")
     s.set_defaults(func=cmd_serve)
 
     s = sub.add_parser("selftest", help="自检（无需权重）")

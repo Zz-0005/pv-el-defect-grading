@@ -1,5 +1,4 @@
 @echo off
-chcp 65001 >nul
 setlocal
 cd /d "%~dp0"
 
@@ -9,32 +8,27 @@ set "PY=%~dp0.venv\Scripts\python.exe"
 if not exist "%PY%" goto noenv
 
 echo ============================================
-echo   PV EL defect grading - demo
+echo   PV EL defect grading - demo (batch mode)
 echo ============================================
 echo.
-echo   Browser will open the demo page
-echo   Drag images from demo\samples into the page
+echo   A browser will open the demo page.
+echo   Drag several EL images in, or use the
+echo   sample buttons. Results export to CSV.
 echo.
-echo   Close this window to stop
+echo   Close this window to stop the server.
 echo ============================================
 echo.
 
-set "PORT=8000"
-netstat -ano | findstr "LISTENING" | findstr ":8000 " >nul 2>&1
-if not errorlevel 1 set "PORT=8010"
-
-if "%PORT%"=="8010" echo [note] port 8000 busy, using 8010
-
-start "" "http://127.0.0.1:%PORT%"
-"%PY%" -m pvinspect serve --port %PORT%
+rem Port is resolved by the program: if 8000 is busy it tries 8001, 8002, ...
+"%PY%" -m pvinspect serve --port 8000 --open
 
 echo.
-echo Server stopped
+echo Server stopped.
 pause
 exit /b 0
 
 :noenv
 echo [ERROR] venv not found: %PY%
-echo Run first: python -m venv .venv
+echo Run this first:  python -m venv .venv
 pause
 exit /b 1
