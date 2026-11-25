@@ -1,0 +1,56 @@
+{
+  "n": 582,
+  "classes": [
+    "P0_合格",
+    "P1_待复核",
+    "P2_判废"
+  ],
+  "accuracy": 0.7612,
+  "macro_f1": 0.6211,
+  "confusion": [
+    [
+      293,
+      9,
+      11
+    ],
+    [
+      43,
+      12,
+      2
+    ],
+    [
+      68,
+      6,
+      138
+    ]
+  ],
+  "per_class": {
+    "P0_合格": {
+      "precision": 0.7252,
+      "recall": 0.9361,
+      "f1": 0.8173,
+      "support": 313
+    },
+    "P1_待复核": {
+      "precision": 0.4444,
+      "recall": 0.2105,
+      "f1": 0.2857,
+      "support": 57
+    },
+    "P2_判废": {
+      "precision": 0.9139,
+      "recall": 0.6509,
+      "f1": 0.7603,
+      "support": 212
+    }
+  },
+  "cost_per_1000": 2753.4,
+  "severe_miss_rate": 0.3491,
+  "severe_support": 212,
+  "latency_ms": {
+    "median": 9.46,
+    "p95": 10.79,
+    "max": 12.73
+  },
+  "source": "out/pred_test.json"
+}

@@ -1,0 +1,86 @@
+{
+  "total_errors": 139,
+  "error_rate": 0.2388,
+  "kinds": {
+    "P2_判废→P0_合格": 68,
+    "P1_待复核→P0_合格": 43,
+    "P0_合格→P2_判废": 11,
+    "P0_合格→P1_待复核": 9,
+    "P2_判废→P1_待复核": 6,
+    "P1_待复核→P2_判废": 2
+  },
+  "picked": [
+    {
+      "image": "fail_01.png",
+      "original": "cell0091.png",
+      "true": "P2_判废",
+      "pred": "P0_合格",
+      "conf": 0.6001,
+      "cost": 20.0
+    },
+    {
+      "image": "fail_02.png",
+      "original": "cell0115.png",
+      "true": "P2_判废",
+      "pred": "P0_合格",
+      "conf": 0.8185,
+      "cost": 20.0
+    },
+    {
+      "image": "fail_03.png",
+      "original": "cell0124.png",
+      "true": "P2_判废",
+      "pred": "P0_合格",
+      "conf": 0.8909,
+      "cost": 20.0
+    },
+    {
+      "image": "fail_04.png",
+      "original": "cell0147.png",
+      "true": "P2_判废",
+      "pred": "P0_合格",
+      "conf": 0.7285,
+      "cost": 20.0
+    },
+    {
+      "image": "fail_05.png",
+      "original": "cell0190.png",
+      "true": "P2_判废",
+      "pred": "P0_合格",
+      "conf": 0.5994,
+      "cost": 20.0
+    },
+    {
+      "image": "fail_06.png",
+      "original": "cell0198.png",
+      "true": "P2_判废",
+      "pred": "P0_合格",
+      "conf": 0.6325,
+      "cost": 20.0
+    },
+    {
+      "image": "fail_07.png",
+      "original": "cell0220.png",
+      "true": "P2_判废",
+      "pred": "P0_合格",
+      "conf": 0.5904,
+      "cost": 20.0
+    },
+    {
+      "image": "fail_08.png",
+      "original": "cell0258.png",
+      "true": "P2_判废",
+      "pred": "P0_合格",
+      "conf": 0.7165,
+      "cost": 20.0
+    },
+    {
+      "image": "fail_09.png",
+      "original": "cell0281.png",
+      "true": "P2_判废",
+      "pred": "P0_合格",
+      "conf": 0.6045,
+      "cost": 20.0
+    }
+  ]
+}

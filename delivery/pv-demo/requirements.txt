@@ -1,0 +1,14 @@
+# 推理 / 评估只需要这几个包——不需要 torch，也不需要 CUDA。
+# 安装：  pip install -r requirements.txt
+#
+# 实测环境：Windows 11 + Python 3.12，CPU 单张约 8 ms。
+# 若要重新训练（不在本包范围内），另需：
+#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
+#   pip install ultralytics
+
+numpy>=1.24
+onnxruntime>=1.20
+pillow>=10.0
+
+# 仅重建网页 / PPT 时需要：
+#   python-pptx>=1.0

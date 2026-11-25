@@ -1,0 +1,93 @@
+{
+  "experiments": [
+    {
+      "id": "E1_grouped",
+      "title": "四级分级 · 按组件分组切分",
+      "note": "主实验：暴露了中间两档坍塌",
+      "accuracy": 0.7045,
+      "macro_f1": 0.4371,
+      "cost_per_1000": 2732.0,
+      "in_package": false
+    },
+    {
+      "id": "E1_random",
+      "title": "四级分级 · 随机切分",
+      "note": "泄漏对照：同一模型换切分方式",
+      "accuracy": 0.733,
+      "macro_f1": 0.5538,
+      "cost_per_1000": 2027.7,
+      "in_package": false
+    },
+    {
+      "id": "E2_binary",
+      "title": "二分类 · 合格/不合格",
+      "note": "更粗的基线",
+      "accuracy": 0.7182,
+      "macro_f1": 0.7166,
+      "cost_per_1000": 3170.1,
+      "in_package": false
+    },
+    {
+      "id": "E3_three",
+      "title": "三档操作级 · 分组切分",
+      "note": "交付包采用的方案",
+      "accuracy": 0.7612,
+      "macro_f1": 0.6211,
+      "cost_per_1000": 2753.4,
+      "in_package": true
+    }
+  ],
+  "leakage": {
+    "grouped": 0.7044673539518901,
+    "random": 0.7329974811083123,
+    "delta_pt": 2.85,
+    "groups": 42,
+    "cross_groups": 0,
+    "cross_dups": 0
+  },
+  "reject_budget": [
+    {
+      "q": 0.0,
+      "accuracy": 0.7612,
+      "macro_f1": 0.6211,
+      "cost_per_1000": 2753.4,
+      "recall_review": 0.211
+    },
+    {
+      "q": 0.05,
+      "accuracy": 0.756,
+      "macro_f1": 0.6375,
+      "cost_per_1000": 2579.9,
+      "recall_review": 0.316
+    },
+    {
+      "q": 0.1,
+      "accuracy": 0.7251,
+      "macro_f1": 0.6122,
+      "cost_per_1000": 2488.0,
+      "recall_review": 0.333
+    },
+    {
+      "q": 0.15,
+      "accuracy": 0.6976,
+      "macro_f1": 0.6008,
+      "cost_per_1000": 2422.7,
+      "recall_review": 0.386
+    },
+    {
+      "q": 0.2,
+      "accuracy": 0.6735,
+      "macro_f1": 0.5867,
+      "cost_per_1000": 2310.1,
+      "recall_review": 0.404
+    },
+    {
+      "q": 0.3,
+      "accuracy": 0.6289,
+      "macro_f1": 0.5675,
+      "cost_per_1000": 1896.0,
+      "recall_review": 0.491
+    }
+  ],
+  "note": "四组实验的指标来自训练阶段评估（权重未全部随包分发）；E3_three 的指标已在包内用 ONNX 复现，与训练阶段一致。拒识预算表由 out/pred_test.json 现算。"
+}

@@ -1,7 +1,7 @@
 $ErrorActionPreference = "Continue"
-Set-Location "F:\展示作品\pv-inspect"
+Set-Location (Join-Path $PSScriptRoot "..")
 $py = ".\.venv\Scripts\python.exe"
-$log = "F:\展示作品\pv-inspect\install.log"
+$log = Join-Path $PSScriptRoot "..\install.log"
 "[$(Get-Date -Format 'HH:mm:ss')] start" | Out-File $log -Encoding utf8
 
 # 1) CUDA 版 torch/torchvision（官方源，速度 1.4 MB/s，约 2.5 GB）

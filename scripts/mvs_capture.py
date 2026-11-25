@@ -2,8 +2,9 @@
 """
 用海康 MVS SDK（Python 绑定）采集真实 EL/可见光图像，存成与 ELPV 同构的目录。
 
-本机已装 MVS 4.6，Python 绑定在：
-    F:\\海康\\MVS\\Development\\Samples\\Python\\MvImport
+本机已装 MVS 4.6，Python 绑定默认在：
+    C:\\Program Files (x86)\\MVS\\Development\\Samples\\Python\\MvImport
+（装在别的盘就改下面的 SDK_PATHS）
 项目不复制这些文件（版权归海康），运行时把该目录加入 sys.path。
 
 重要：当前机器**未接工业相机**，本脚本会检测不到设备并给出提示。
@@ -23,7 +24,6 @@ import time
 from pathlib import Path
 
 SDK_PATHS = [
-    Path(r"F:\海康\MVS\Development\Samples\Python\MvImport"),
     Path(r"C:\Program Files (x86)\MVS\Development\Samples\Python\MvImport"),
     Path(r"C:\Program Files\MVS\Development\Samples\Python\MvImport"),
 ]

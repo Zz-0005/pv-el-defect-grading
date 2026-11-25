@@ -20,3 +20,9 @@ dist/
 # 系统
 .DS_Store
 Thumbs.db
+
+# 交付包里的训练/验证/测试全量图（体积大，按 README 重新下载）
+delivery/pv-demo/train/
+delivery/pv-demo/valid/
+delivery/pv-demo/test/
+delivery/pv-demo/**_python.txt

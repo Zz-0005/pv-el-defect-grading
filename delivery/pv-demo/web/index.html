@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>光伏电池片 EL 缺陷分级 · 技术报告</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f4f7f9;color:#152430;
+ font-family:-apple-system,"Microsoft YaHei","Segoe UI",sans-serif;line-height:1.72;font-size:15px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 22px 90px}
+header.top{background:#152430;color:#fff;padding:52px 0 44px;margin-bottom:34px}
+header.top .wrap{padding-bottom:0}
+.eyebrow{color:#6fb3b3;font-size:12.5px;letter-spacing:.14em;font-weight:700}
+h1{font-size:34px;line-height:1.25;margin:12px 0 14px;font-weight:800}
+.lead{color:#b9cdd3;font-size:15.5px;max-width:820px}
+h2{font-size:23px;margin:52px 0 6px;padding-top:14px;border-top:2px solid #152430;font-weight:800}
+h2 .n{color:#0e6f73;font-size:15px;margin-right:10px;vertical-align:2px}
+h3{font-size:17px;margin:26px 0 8px;color:#152430}
+p{margin:10px 0}
+.muted{color:#7c8c99;font-size:13.5px}
+code{background:#eaf0f4;padding:1px 6px;border-radius:4px;font-size:13px;
+ font-family:Consolas,Monaco,monospace}
+pre{background:#152430;color:#d8e6ea;padding:14px 18px;border-radius:8px;overflow:auto;
+ font-size:13px;line-height:1.6}
+pre code{background:none;padding:0;color:inherit}
+table{border-collapse:collapse;width:100%;margin:14px 0;font-size:13.5px;background:#fff}
+th{background:#152430;color:#fff;text-align:left;padding:9px 11px;font-weight:600;font-size:13px}
+td{border-bottom:1px solid #e3ebf0;padding:8px 11px;vertical-align:top}
+tbody tr:hover td{background:#f7fbfc}
+.grid{display:grid;gap:14px;margin:18px 0}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g2{grid-template-columns:repeat(2,1fr)}
+.card{background:#fff;border:1px solid #dde6ec;border-radius:10px;padding:18px 20px}
+.card.warn{border-left:4px solid #c9762a}
+.card.ok{border-left:4px solid #0e6f73}
+.kpi{background:#fff;border:1px solid #dde6ec;border-radius:10px;padding:16px 18px}
+.kv{font-size:27px;font-weight:800;line-height:1.2}
+.kl{font-size:13px;color:#3d5261;margin-top:4px;font-weight:600}
+.ks{font-size:12px;color:#899aa6;margin-top:2px}
+.viewer{display:grid;grid-template-columns:1.25fr .75fr;gap:18px;background:#fff;
+ border:1px solid #dde6ec;border-radius:12px;padding:16px;margin:18px 0}
+.vstage{background:#0d1b22;border-radius:8px;display:flex;align-items:center;justify-content:center;
+ min-height:340px;overflow:hidden}
+.vstage img{max-width:100%;max-height:520px;display:block}
+.vside{display:flex;flex-direction:column;gap:10px}
+.vbtns{display:flex;gap:8px;flex-wrap:wrap}
+.vbtn{border:1px solid #c3d2da;background:#fff;border-radius:7px;padding:8px 14px;
+ font-size:13.5px;cursor:pointer;font-family:inherit}
+.vbtn.on{background:#0e6f73;color:#fff;border-color:#0e6f73}
+.vmeta{background:#f4f7f9;border-radius:8px;padding:12px 14px;font-size:14px;min-height:120px}
+.vk{font-size:11.5px;color:#8b9aa5;letter-spacing:.08em;margin-top:6px}
+.vv{font-size:17px;font-weight:700}
+.vnav{display:flex;gap:10px;align-items:center;justify-content:space-between}
+.vnav button{border:1px solid #c3d2da;background:#fff;border-radius:7px;padding:8px 12px;
+ cursor:pointer;font-family:inherit;font-size:13px}
+.vhint{font-size:12px;color:#9aa9b3}
+.ok{color:#1a7f37;font-weight:700}
+.bad{color:#c0392b;font-weight:700}
+.tag{background:#e3f0f0;color:#0e6f73;font-size:11.5px;padding:2px 8px;border-radius:10px}
+.hot{color:#0e6f73;font-weight:800}
+.warn{color:#c0392b;font-weight:700}
+.bl{display:flex;align-items:center;gap:10px;margin:6px 0;font-size:13.5px}
+.bl span:first-child{width:76px;color:#3d5261}
+.bb{flex:1;height:9px;background:#eaf0f4;border-radius:5px;overflow:hidden}
+.bb i{display:block;height:100%}
+.bv{width:56px;text-align:right;color:#7c8c99;font-size:13px}
+.note{background:#fdf6ec;border-left:4px solid #c9762a;padding:12px 16px;border-radius:6px;
+ margin:16px 0;font-size:14px}
+footer{margin-top:60px;padding-top:20px;border-top:1px solid #dde6ec;color:#8b9aa5;font-size:13px}
+@media(max-width:900px){.g3{grid-template-columns:1fr}.g2{grid-template-columns:1fr}
+ .viewer{grid-template-columns:1fr}}
+</style></head><body>
+<header class="top"><div class="wrap">
+<div class="eyebrow">AI 机器视觉 · 课程设计 · 技术报告（离线）</div>
+<h1>光伏电池片 EL 图像缺陷分级</h1>
+<div class="lead">用 YOLOv8 分类头把一片电池片的电致发光图像判成三档——
+合格 / 待复核 / 判废，并给出处置动作与缺陷热力图。
+数据是 ELPV 公开的 2624 张真实产线 EL 图像，全部指标可在本机一条命令复现。</div>
+</div></header><div class="wrap"><h2><span class="n">一</span>概览</h2><p>先说结论：这套系统解决的不是"有没有缺陷"（那是二分类，一句话就完了），而是<b>"有多严重、该判废还是返修"</b>——因为产线上的处置动作完全取决于档位。</p><div class="grid g3"><div class="kpi"><div class="kv" style="color:#0e6f73">0.761</div><div class="kl">测试集准确率</div><div class="ks">582 张冻结测试集</div></div><div class="kpi"><div class="kv" style="color:#0e6f73">0.621</div><div class="kl">宏平均 F1</div><div class="ks">照顾稀有档「待复核」</div></div><div class="kpi"><div class="kv" style="color:#0e6f73">9.5 ms</div><div class="kl">单张推理（CPU）</div><div class="ks">P95 10.8 ms，ONNX</div></div></div><div class="grid g3"><div class="kpi"><div class="kv" style="color:#0e6f73">0.936</div><div class="kl">合格档召回</div><div class="ks">良品几乎不误拦</div></div><div class="kpi"><div class="kv" style="color:#0e6f73">0.914</div><div class="kl">判废档精确率</div><div class="ks">判废误伤率低</div></div><div class="kpi"><div class="kv" style="color:#c9762a">34.9%</div><div class="kl">判废漏判率</div><div class="ks">真实判废被判成合格/待复核</div></div></div><div class="note"><b>这套系统现在能做什么、不能做什么：</b><br>能：把一片电池片按严重度分成三档，给出处置建议，并指出模型关注的位置。<br>不能：直接用于产线判废。分级档位来自数据集标注，不是 IEC 判废标准；判废漏判率 34.9% 也还不能接受。它的价值是证明方法可行、指标可复现、边界清楚。</div><h2><span class="n">二</span>运行环境</h2><p>交付包<b>不需要 torch，也不需要 CUDA</b>。推理用 ONNX Runtime，四个依赖包约 120 MB：</p><pre><code>numpy&gt;=2.0
+onnxruntime&gt;=1.20
+opencv-python-headless&gt;=4.10
+pillow&gt;=10.0
+
+pip install -r requirements.txt
+python tools/onnx_predict.py --split test --json out/pred_test.json</code></pre><p class="muted">本机实测：CPU（i5-11260H）单张中位 9.46 ms，582 张测试集 582 张约 6 秒。若装 GPU 版 onnxruntime 可进一步压缩。</p><h2><span class="n">三</span>数据来源（真实产线 EL 图像）</h2><p><b>ELPV Dataset</b>（Buerhop-Lutz 等，EU PVSEC 2018）：2624 张 300×300 8 位灰度电致发光图像，来自 <b>44 块真实光伏组件</b>，每张带人工标注的缺陷概率与晶型（单晶 1074 / 多晶 1550）。</p><div class="grid g2"><div class="card ok"><h3>为什么选它</h3><ul><li>是真实产线图像，不是渲染合成；</li><li>缺陷概率只有 4 个离散取值（0.0 / 1/3 / 2/3 / 1.0），所以"分级"是数据集本身的标注粒度，不是我为凑任务切的；</li><li>体量小（93 MB），全部可在本机复现。</li></ul></div><div class="card warn"><h3>必须说明的两点</h3><ul><li>分级档位来自数据集标注，<b>不是行业判废标准</b>（IEC 61215 更细）；</li><li>没有缺陷类型标注（隐裂/断栅/黑斑），只有整体严重度。</li></ul></div></div><p class="muted">许可：CC-BY-NC-SA-4.0，仅用于教学与竞赛。</p><h2><span class="n">四</span>模型与类别映射</h2><table class="small"><thead><tr><th>档位</th><th>含义（数据集标注）</th><th>处置动作</th></tr></thead><tbody><tr><td><b>合格</b></td><td>缺陷概率 0.0</td><td>正常流转</td></tr><tr><td><b>待复核</b></td><td>缺陷概率 1/3 ~ 2/3</td><td>返修 / 降级</td></tr><tr><td><b>判废</b></td><td>缺陷概率 1.0</td><td>判废</td></tr></tbody></table><p>模型：<code>YOLOv8s-cls</code> 微调后导出 ONNX（20.3 MB）。输入 <code>1×3×224×224</code>，输出 <b>3 类 softmax 概率</b>（和恒为 1）。</p><div class="note">这里有个容易踩的坑：ultralytics 分类头的输出<b>已经是 softmax 概率</b>，再套一次 softmax 会把分布二次压缩。我一开始就踩了，导致热力图解释的概率与推理概率最大偏差 0.52，等于解释的不是模型的结论。</div><h2><span class="n">五</span>系统架构：基线在哪儿，我改了什么</h2><p>被问"你这就是调了个 YOLO 吗"，答案在这一节。调 YOLO 是最后一步，前面三件事才是这个项目的主体：</p><div class="grid g3"><div class="card"><h3>① 切分</h3><p>2624 张图来自 44 块组件，相邻电池片成像几乎一致。按图片随机切分，孪生样本会同时进训练和测试，指标虚高。</p><p><b>做法：</b>用 16×16 外观向量 k-means 还原组件分组，按组切分，并做两道泄漏检查。</p></div><div class="card"><h3>② 分级粒度</h3><p>先做四级（良好/轻微/中度/严重），结果中间两档召回<b>都是 0</b>——模型直接放弃这两类。加过采样后有恢复但仍是最弱环节。</p><p><b>做法：</b>合并成三档操作级，把"轻微/中度"并成"待复核"，两者在产线上的动作本就同属返修/降级。</p></div><div class="card"><h3>③ 拒识</h3><p>纯 argmax 会把没把握的样本硬塞进某一档。</p><p><b>做法：</b>固定人工预算，把最没把握的 5% 转人工复核。宏 F1 0.621→0.638，代价降 6%，准确率只掉 0.5 个点。</p></div></div><h2><span class="n">六</span>操作流程（可复现）</h2><pre><code>cd pv-demo
+
+# 一键重跑网页上的所有数字
+python run.py --all
+
+# 或者分步：
+python run.py --infer      # 1) ONNX 推理测试集
+python run.py --eval       # 2) 与真值比对，出指标
+python run.py --failures   # 3) 挑失败案例
+python run.py --painting   # 4) 渲染三视图
+python run.py --web        # 5) 重建本网页</code></pre><p class="muted">网页里的每个数字都来自 <code>out/*.json</code>，而 json 由上面这些脚本现算，不是手写的。</p><h2><span class="n">七</span>分级效果（原图 / 真值 / 预测）</h2><p>精挑 7 张演示图，其中 6 张判定正确、1 张刻意保留了判错的难例。点按钮切换三视图，<b>← →</b> 翻页。</p>
+<div class="viewer" id="v1">
+  <div class="vstage"><img id="v1_img" alt=""></div>
+  <div class="vside">
+    <div class="vbtns">
+      <button class="vbtn on" data-mode="orig">原图</button>
+      <button class="vbtn" data-mode="gt">数据集真值</button>
+      <button class="vbtn" data-mode="pred">模型预测</button>
+    </div>
+    <div class="vmeta" id="v1_meta"></div>
+    <div class="vnav">
+      <button id="v1_prev">← 上一张</button>
+      <span id="v1_idx"></span>
+      <button id="v1_next">下一张 →</button>
+    </div>
+    <div class="vhint">键盘 ← → 翻页；按钮切换三视图</div>
+  </div>
+</div>
+<script>
+(function(){
+  const D = [{"orig": "assets/orig_demo_01.jpg", "gt": "assets/gt_demo_01.jpg", "pred": "assets/pred_demo_01.jpg", "true": "判废", "predcn": "判废", "conf": 1.0, "name": "demo_01", "ok": true}, {"orig": "assets/orig_demo_02.jpg", "gt": "assets/gt_demo_02.jpg", "pred": "assets/pred_demo_02.jpg", "true": "判废", "predcn": "判废", "conf": 1.0, "name": "demo_02", "ok": true}, {"orig": "assets/orig_demo_03.jpg", "gt": "assets/gt_demo_03.jpg", "pred": "assets/pred_demo_03.jpg", "true": "合格", "predcn": "合格", "conf": 0.8653820157051086, "name": "demo_03", "ok": true}, {"orig": "assets/orig_demo_04.jpg", "gt": "assets/gt_demo_04.jpg", "pred": "assets/pred_demo_04.jpg", "true": "合格", "predcn": "合格", "conf": 0.8563724160194397, "name": "demo_04", "ok": true}, {"orig": "assets/orig_demo_05.jpg", "gt": "assets/gt_demo_05.jpg", "pred": "assets/pred_demo_05.jpg", "true": "合格", "predcn": "合格", "conf": 0.8380507230758667, "name": "demo_05", "ok": true}, {"orig": "assets/orig_demo_06.jpg", "gt": "assets/gt_demo_06.jpg", "pred": "assets/pred_demo_06.jpg", "true": "待复核", "predcn": "待复核", "conf": 0.5598026514053345, "name": "demo_06", "ok": true}, {"orig": "assets/orig_demo_07.jpg", "gt": "assets/gt_demo_07.jpg", "pred": "assets/pred_demo_07.jpg", "true": "待复核", "predcn": "合格", "conf": 0.448493629693985, "name": "demo_07", "ok": false}], root = document.getElementById("v1");
+  let i = 0, mode = "orig";
+  const img = document.getElementById("v1_img");
+  const meta = document.getElementById("v1_meta");
+  const idx = document.getElementById("v1_idx");
+  function render() {
+    const d = D[i];
+    img.src = d[mode];
+    idx.textContent = (i + 1) + " / " + D.length;
+    const ok = d.ok ? '<span class="ok">判定正确</span>' : '<span class="bad">判定错误</span>';
+    meta.innerHTML = `<div class="vk">真值</div><div class="vv">${d.true}</div>
+      <div class="vk">预测</div><div class="vv">${d.predcn} <b>${d.conf.toFixed(2)}</b></div>
+      <div>${ok}</div>`;
+  }
+  root.querySelectorAll(".vbtn").forEach(b => b.onclick = () => {
+    root.querySelectorAll(".vbtn").forEach(x => x.classList.remove("on"));
+    b.classList.add("on"); mode = b.dataset.mode; render();
+  });
+  document.getElementById("v1_prev").onclick = () => { i = (i - 1 + D.length) % D.length; render(); };
+  document.getElementById("v1_next").onclick = () => { i = (i + 1) % D.length; render(); };
+  window.addEventListener("keydown", e => {
+    if (e.key === "ArrowLeft") { i = (i - 1 + D.length) % D.length; render(); }
+    if (e.key === "ArrowRight") { i = (i + 1) % D.length; render(); }
+  });
+  render();
+})();
+</script><h3>七·二、扩展测试集</h3><p>从测试集均匀抽取 60 张（覆盖更多组件），判定正确 36 张，准确率 60.0%。这就是"跨组件泛化"的真实水平。</p>
+<div class="viewer" id="v2">
+  <div class="vstage"><img id="v2_img" alt=""></div>
+  <div class="vside">
+    <div class="vbtns">
+      <button class="vbtn on" data-mode="orig">原图</button>
+      <button class="vbtn" data-mode="gt">数据集真值</button>
+      <button class="vbtn" data-mode="pred">模型预测</button>
+    </div>
+    <div class="vmeta" id="v2_meta"></div>
+    <div class="vnav">
+      <button id="v2_prev">← 上一张</button>
+      <span id="v2_idx"></span>
+      <button id="v2_next">下一张 →</button>
+    </div>
+    <div class="vhint">键盘 ← → 翻页；按钮切换三视图</div>
+  </div>
+</div>
+<script>
+(function(){
+  const D = [{"orig": "assets/orig_x_001.jpg", "gt": "assets/gt_x_001.jpg", "pred": "assets/pred_x_001.jpg", "true": "合格", "predcn": "判废", "conf": 0.46041932702064514, "name": "x_001", "ok": false}, {"orig": "assets/orig_x_002.jpg", "gt": "assets/gt_x_002.jpg", "pred": "assets/pred_x_002.jpg", "true": "合格", "predcn": "合格", "conf": 0.8278970718383789, "name": "x_002", "ok": true}, {"orig": "assets/orig_x_003.jpg", "gt": "assets/gt_x_003.jpg", "pred": "assets/pred_x_003.jpg", "true": "合格", "predcn": "合格", "conf": 0.6729574799537659, "name": "x_003", "ok": true}, {"orig": "assets/orig_x_004.jpg", "gt": "assets/gt_x_004.jpg", "pred": "assets/pred_x_004.jpg", "true": "合格", "predcn": "合格", "conf": 0.5556780099868774, "name": "x_004", "ok": true}, {"orig": "assets/orig_x_005.jpg", "gt": "assets/gt_x_005.jpg", "pred": "assets/pred_x_005.jpg", "true": "合格", "predcn": "合格", "conf": 0.6744959950447083, "name": "x_005", "ok": true}, {"orig": "assets/orig_x_006.jpg", "gt": "assets/gt_x_006.jpg", "pred": "assets/pred_x_006.jpg", "true": "合格", "predcn": "合格", "conf": 0.8274394869804382, "name": "x_006", "ok": true}, {"orig": "assets/orig_x_007.jpg", "gt": "assets/gt_x_007.jpg", "pred": "assets/pred_x_007.jpg", "true": "合格", "predcn": "合格", "conf": 0.9254787564277649, "name": "x_007", "ok": true}, {"orig": "assets/orig_x_008.jpg", "gt": "assets/gt_x_008.jpg", "pred": "assets/pred_x_008.jpg", "true": "合格", "predcn": "合格", "conf": 0.7483745217323303, "name": "x_008", "ok": true}, {"orig": "assets/orig_x_009.jpg", "gt": "assets/gt_x_009.jpg", "pred": "assets/pred_x_009.jpg", "true": "合格", "predcn": "合格", "conf": 0.810971200466156, "name": "x_009", "ok": true}, {"orig": "assets/orig_x_010.jpg", "gt": "assets/gt_x_010.jpg", "pred": "assets/pred_x_010.jpg", "true": "合格", "predcn": "合格", "conf": 0.9311019778251648, "name": "x_010", "ok": true}, {"orig": "assets/orig_x_011.jpg", "gt": "assets/gt_x_011.jpg", "pred": "assets/pred_x_011.jpg", "true": "合格", "predcn": "合格", "conf": 0.9311219453811646, "name": "x_011", "ok": true}, {"orig": "assets/orig_x_012.jpg", "gt": "assets/gt_x_012.jpg", "pred": "assets/pred_x_012.jpg", "true": "合格", "predcn": "合格", "conf": 0.9399824142456055, "name": "x_012", "ok": true}, {"orig": "assets/orig_x_013.jpg", "gt": "assets/gt_x_013.jpg", "pred": "assets/pred_x_013.jpg", "true": "合格", "predcn": "合格", "conf": 0.9434495568275452, "name": "x_013", "ok": true}, {"orig": "assets/orig_x_014.jpg", "gt": "assets/gt_x_014.jpg", "pred": "assets/pred_x_014.jpg", "true": "合格", "predcn": "合格", "conf": 0.5092777609825134, "name": "x_014", "ok": true}, {"orig": "assets/orig_x_015.jpg", "gt": "assets/gt_x_015.jpg", "pred": "assets/pred_x_015.jpg", "true": "合格", "predcn": "待复核", "conf": 0.6183837056159973, "name": "x_015", "ok": false}, {"orig": "assets/orig_x_016.jpg", "gt": "assets/gt_x_016.jpg", "pred": "assets/pred_x_016.jpg", "true": "合格", "predcn": "合格", "conf": 0.5930460691452026, "name": "x_016", "ok": true}, {"orig": "assets/orig_x_017.jpg", "gt": "assets/gt_x_017.jpg", "pred": "assets/pred_x_017.jpg", "true": "合格", "predcn": "合格", "conf": 0.5020307302474976, "name": "x_017", "ok": true}, {"orig": "assets/orig_x_018.jpg", "gt": "assets/gt_x_018.jpg", "pred": "assets/pred_x_018.jpg", "true": "合格", "predcn": "合格", "conf": 0.8997212052345276, "name": "x_018", "ok": true}, {"orig": "assets/orig_x_019.jpg", "gt": "assets/gt_x_019.jpg", "pred": "assets/pred_x_019.jpg", "true": "合格", "predcn": "合格", "conf": 0.8930487632751465, "name": "x_019", "ok": true}, {"orig": "assets/orig_x_020.jpg", "gt": "assets/gt_x_020.jpg", "pred": "assets/pred_x_020.jpg", "true": "合格", "predcn": "合格", "conf": 0.9522061944007874, "name": "x_020", "ok": true}, {"orig": "assets/orig_x_021.jpg", "gt": "assets/gt_x_021.jpg", "pred": "assets/pred_x_021.jpg", "true": "待复核", "predcn": "合格", "conf": 0.448493629693985, "name": "x_021", "ok": false}, {"orig": "assets/orig_x_022.jpg", "gt": "assets/gt_x_022.jpg", "pred": "assets/pred_x_022.jpg", "true": "待复核", "predcn": "合格", "conf": 0.48224958777427673, "name": "x_022", "ok": false}, {"orig": "assets/orig_x_023.jpg", "gt": "assets/gt_x_023.jpg", "pred": "assets/pred_x_023.jpg", "true": "待复核", "predcn": "合格", "conf": 0.6317792534828186, "name": "x_023", "ok": false}, {"orig": "assets/orig_x_024.jpg", "gt": "assets/gt_x_024.jpg", "pred": "assets/pred_x_024.jpg", "true": "待复核", "predcn": "合格", "conf": 0.8178011178970337, "name": "x_024", "ok": false}, {"orig": "assets/orig_x_025.jpg", "gt": "assets/gt_x_025.jpg", "pred": "assets/pred_x_025.jpg", "true": "待复核", "predcn": "合格", "conf": 0.5792045593261719, "name": "x_025", "ok": false}, {"orig": "assets/orig_x_026.jpg", "gt": "assets/gt_x_026.jpg", "pred": "assets/pred_x_026.jpg", "true": "待复核", "predcn": "合格", "conf": 0.8154497146606445, "name": "x_026", "ok": false}, {"orig": "assets/orig_x_027.jpg", "gt": "assets/gt_x_027.jpg", "pred": "assets/pred_x_027.jpg", "true": "待复核", "predcn": "合格", "conf": 0.5491017699241638, "name": "x_027", "ok": false}, {"orig": "assets/orig_x_028.jpg", "gt": "assets/gt_x_028.jpg", "pred": "assets/pred_x_028.jpg", "true": "待复核", "predcn": "合格", "conf": 0.8757370114326477, "name": "x_028", "ok": false}, {"orig": "assets/orig_x_029.jpg", "gt": "assets/gt_x_029.jpg", "pred": "assets/pred_x_029.jpg", "true": "待复核", "predcn": "合格", "conf": 0.8659337162971497, "name": "x_029", "ok": false}, {"orig": "assets/orig_x_030.jpg", "gt": "assets/gt_x_030.jpg", "pred": "assets/pred_x_030.jpg", "true": "待复核", "predcn": "合格", "conf": 0.4698902666568756, "name": "x_030", "ok": false}, {"orig": "assets/orig_x_031.jpg", "gt": "assets/gt_x_031.jpg", "pred": "assets/pred_x_031.jpg", "true": "待复核", "predcn": "合格", "conf": 0.8249085545539856, "name": "x_031", "ok": false}, {"orig": "assets/orig_x_032.jpg", "gt": "assets/gt_x_032.jpg", "pred": "assets/pred_x_032.jpg", "true": "待复核", "predcn": "合格", "conf": 0.9219659566879272, "name": "x_032", "ok": false}, {"orig": "assets/orig_x_033.jpg", "gt": "assets/gt_x_033.jpg", "pred": "assets/pred_x_033.jpg", "true": "待复核", "predcn": "合格", "conf": 0.7914782166481018, "name": "x_033", "ok": false}, {"orig": "assets/orig_x_034.jpg", "gt": "assets/gt_x_034.jpg", "pred": "assets/pred_x_034.jpg", "true": "待复核", "predcn": "合格", "conf": 0.7703077793121338, "name": "x_034", "ok": false}, {"orig": "assets/orig_x_035.jpg", "gt": "assets/gt_x_035.jpg", "pred": "assets/pred_x_035.jpg", "true": "待复核", "predcn": "待复核", "conf": 0.5955405831336975, "name": "x_035", "ok": true}, {"orig": "assets/orig_x_036.jpg", "gt": "assets/gt_x_036.jpg", "pred": "assets/pred_x_036.jpg", "true": "判废", "predcn": "判废", "conf": 0.7877807021141052, "name": "x_036", "ok": true}, {"orig": "assets/orig_x_037.jpg", "gt": "assets/gt_x_037.jpg", "pred": "assets/pred_x_037.jpg", "true": "判废", "predcn": "判废", "conf": 0.9997034668922424, "name": "x_037", "ok": true}, {"orig": "assets/orig_x_038.jpg", "gt": "assets/gt_x_038.jpg", "pred": "assets/pred_x_038.jpg", "true": "判废", "predcn": "判废", "conf": 0.9932668209075928, "name": "x_038", "ok": true}, {"orig": "assets/orig_x_039.jpg", "gt": "assets/gt_x_039.jpg", "pred": "assets/pred_x_039.jpg", "true": "判废", "predcn": "合格", "conf": 0.8908722400665283, "name": "x_039", "ok": false}, {"orig": "assets/orig_x_040.jpg", "gt": "assets/gt_x_040.jpg", "pred": "assets/pred_x_040.jpg", "true": "判废", "predcn": "判废", "conf": 0.9920712113380432, "name": "x_040", "ok": true}, {"orig": "assets/orig_x_041.jpg", "gt": "assets/gt_x_041.jpg", "pred": "assets/pred_x_041.jpg", "true": "判废", "predcn": "判废", "conf": 0.7419459223747253, "name": "x_041", "ok": true}, {"orig": "assets/orig_x_042.jpg", "gt": "assets/gt_x_042.jpg", "pred": "assets/pred_x_042.jpg", "true": "判废", "predcn": "合格", "conf": 0.6886721849441528, "name": "x_042", "ok": false}, {"orig": "assets/orig_x_043.jpg", "gt": "assets/gt_x_043.jpg", "pred": "assets/pred_x_043.jpg", "true": "判废", "predcn": "判废", "conf": 1.0, "name": "x_043", "ok": true}, {"orig": "assets/orig_x_044.jpg", "gt": "assets/gt_x_044.jpg", "pred": "assets/pred_x_044.jpg", "true": "判废", "predcn": "判废", "conf": 1.0, "name": "x_044", "ok": true}, {"orig": "assets/orig_x_045.jpg", "gt": "assets/gt_x_045.jpg", "pred": "assets/pred_x_045.jpg", "true": "判废", "predcn": "判废", "conf": 0.9999986886978149, "name": "x_045", "ok": true}, {"orig": "assets/orig_x_046.jpg", "gt": "assets/gt_x_046.jpg", "pred": "assets/pred_x_046.jpg", "true": "判废", "predcn": "判废", "conf": 0.9996911287307739, "name": "x_046", "ok": true}, {"orig": "assets/orig_x_047.jpg", "gt": "assets/gt_x_047.jpg", "pred": "assets/pred_x_047.jpg", "true": "判废", "predcn": "判废", "conf": 1.0, "name": "x_047", "ok": true}, {"orig": "assets/orig_x_048.jpg", "gt": "assets/gt_x_048.jpg", "pred": "assets/pred_x_048.jpg", "true": "判废", "predcn": "判废", "conf": 1.0, "name": "x_048", "ok": true}, {"orig": "assets/orig_x_049.jpg", "gt": "assets/gt_x_049.jpg", "pred": "assets/pred_x_049.jpg", "true": "判废", "predcn": "判废", "conf": 1.0, "name": "x_049", "ok": true}, {"orig": "assets/orig_x_050.jpg", "gt": "assets/gt_x_050.jpg", "pred": "assets/pred_x_050.jpg", "true": "判废", "predcn": "判废", "conf": 1.0, "name": "x_050", "ok": true}, {"orig": "assets/orig_x_051.jpg", "gt": "assets/gt_x_051.jpg", "pred": "assets/pred_x_051.jpg", "true": "判废", "predcn": "判废", "conf": 0.9998641014099121, "name": "x_051", "ok": true}, {"orig": "assets/orig_x_052.jpg", "gt": "assets/gt_x_052.jpg", "pred": "assets/pred_x_052.jpg", "true": "判废", "predcn": "合格", "conf": 0.663695752620697, "name": "x_052", "ok": false}, {"orig": "assets/orig_x_053.jpg", "gt": "assets/gt_x_053.jpg", "pred": "assets/pred_x_053.jpg", "true": "判废", "predcn": "判废", "conf": 0.9103559851646423, "name": "x_053", "ok": true}, {"orig": "assets/orig_x_054.jpg", "gt": "assets/gt_x_054.jpg", "pred": "assets/pred_x_054.jpg", "true": "判废", "predcn": "待复核", "conf": 0.6618732213973999, "name": "x_054", "ok": false}, {"orig": "assets/orig_x_055.jpg", "gt": "assets/gt_x_055.jpg", "pred": "assets/pred_x_055.jpg", "true": "判废", "predcn": "判废", "conf": 0.999995231628418, "name": "x_055", "ok": true}, {"orig": "assets/orig_x_056.jpg", "gt": "assets/gt_x_056.jpg", "pred": "assets/pred_x_056.jpg", "true": "判废", "predcn": "合格", "conf": 0.7730097770690918, "name": "x_056", "ok": false}, {"orig": "assets/orig_x_057.jpg", "gt": "assets/gt_x_057.jpg", "pred": "assets/pred_x_057.jpg", "true": "判废", "predcn": "判废", "conf": 1.0, "name": "x_057", "ok": true}, {"orig": "assets/orig_x_058.jpg", "gt": "assets/gt_x_058.jpg", "pred": "assets/pred_x_058.jpg", "true": "判废", "predcn": "合格", "conf": 0.603044867515564, "name": "x_058", "ok": false}, {"orig": "assets/orig_x_059.jpg", "gt": "assets/gt_x_059.jpg", "pred": "assets/pred_x_059.jpg", "true": "判废", "predcn": "合格", "conf": 0.48503613471984863, "name": "x_059", "ok": false}, {"orig": "assets/orig_x_060.jpg", "gt": "assets/gt_x_060.jpg", "pred": "assets/pred_x_060.jpg", "true": "判废", "predcn": "合格", "conf": 0.7008023262023926, "name": "x_060", "ok": false}], root = document.getElementById("v2");
+  let i = 0, mode = "orig";
+  const img = document.getElementById("v2_img");
+  const meta = document.getElementById("v2_meta");
+  const idx = document.getElementById("v2_idx");
+  function render() {
+    const d = D[i];
+    img.src = d[mode];
+    idx.textContent = (i + 1) + " / " + D.length;
+    const ok = d.ok ? '<span class="ok">判定正确</span>' : '<span class="bad">判定错误</span>';
+    meta.innerHTML = `<div class="vk">真值</div><div class="vv">${d.true}</div>
+      <div class="vk">预测</div><div class="vv">${d.predcn} <b>${d.conf.toFixed(2)}</b></div>
+      <div>${ok}</div>`;
+  }
+  root.querySelectorAll(".vbtn").forEach(b => b.onclick = () => {
+    root.querySelectorAll(".vbtn").forEach(x => x.classList.remove("on"));
+    b.classList.add("on"); mode = b.dataset.mode; render();
+  });
+  document.getElementById("v2_prev").onclick = () => { i = (i - 1 + D.length) % D.length; render(); };
+  document.getElementById("v2_next").onclick = () => { i = (i + 1) % D.length; render(); };
+  window.addEventListener("keydown", e => {
+    if (e.key === "ArrowLeft") { i = (i - 1 + D.length) % D.length; render(); }
+    if (e.key === "ArrowRight") { i = (i + 1) % D.length; render(); }
+  });
+  render();
+})();
+</script><h2><span class="n">八</span>评估指标</h2><p>冻结测试集 <b>582</b> 张，从未参与训练或调参。准确率 <b>0.7612</b>，宏平均 F1 <b>0.6211</b>，加权代价 <b>2753.4</b> / 千张。</p><h3>分类别</h3><table class=""><thead><tr><th>档位</th><th>精确率</th><th>召回率</th><th>F1</th><th>样本数</th></tr></thead><tbody><tr><td><b>合格</b></td><td>0.725</td><td>0.936</td><td>0.817</td><td>313</td></tr><tr><td><b>待复核</b></td><td>0.444</td><td>0.210</td><td>0.286</td><td>57</td></tr><tr><td><b>判废</b></td><td>0.914</td><td>0.651</td><td>0.760</td><td>212</td></tr></tbody></table><h3>混淆矩阵</h3><table class="cm"><thead><tr><th>真实 \ 预测</th><th>合格</th><th>待复核</th><th>判废</th></tr></thead><tbody><tr><td><b>合格</b></td><td><span class="hot">293</span></td><td><span class="warn">9</span></td><td><span class="warn">11</span></td></tr><tr><td><b>待复核</b></td><td><span class="warn">43</span></td><td><span class="hot">12</span></td><td><span class="warn">2</span></td></tr><tr><td><b>判废</b></td><td><span class="warn">68</span></td><td><span class="warn">6</span></td><td><span class="hot">138</span></td></tr></tbody></table><p class="muted">行=真实，列=预测。对角线上是判对的；<span class="warn">红色</span>是代价最高的错——真实判废被判成合格，共 68 张。</p><h3>为什么不能只看准确率</h3><p>「待复核」只占测试集的 9.8%，准确率天然掩盖它。它的召回只有 <b>0.210</b>——这是全系统最弱的一环，所以单独列出来，而不是用宏平均粉饰过去。</p><p class="muted">验证集（435 张）参考：准确率 0.8253，宏 F1 0.6652。验证集比测试集好，说明跨组件泛化仍有波动。</p><h2><span class="n">九</span>A/B 公平对照：我改的每一步值多少</h2><h3>9.1 四组实验</h3><table class=""><thead><tr><th>实验</th><th>说明</th><th>准确率</th><th>宏F1</th><th>代价/千张</th><th></th></tr></thead><tbody><tr><td><code>E1_grouped</code></td><td>四级分级 · 按组件分组切分</td><td>0.7045</td><td>0.4371</td><td>2732.0</td><td></td></tr><tr><td><code>E1_random</code></td><td>四级分级 · 随机切分</td><td>0.7330</td><td>0.5538</td><td>2027.7</td><td></td></tr><tr><td><code>E2_binary</code></td><td>二分类 · 合格/不合格</td><td>0.7182</td><td>0.7166</td><td>3170.1</td><td></td></tr><tr><td><code>E3_three</code></td><td>三档操作级 · 分组切分</td><td>0.7612</td><td>0.6211</td><td>2753.4</td><td><span class="tag">包内可复现</span></td></tr></tbody></table><div class="note"><b>泄漏对照：</b>同一模型、同一批样本、同一超参，只换切分方式——分组切分 0.7045，随机切分 0.7330，差 <b>+2.85</b> 个百分点。随机切分更高不是模型更强，是同一块组件的孪生样本漏进了测试集。还原出 42 个组件组后，同组跨 split 与重复样本跨 split 都是 0。</div><h3>9.2 拒识预算：把最没把握的 q% 转人工</h3><p>这一节记录一次<b>失败后再做对</b>的过程。我先按业务代价做无约束优化，算法给出的解是"置信度低于 90% 就判待复核"——代价降 57%，但它把 <b>73% 的合格品</b>都标成了待复核。这不是模型变好，是评价函数允许它作弊（代价表里"多看一眼"只记 1 分，"漏掉判废"记 20 分）。</p><p>所以把约束加回去：<b>人工复核有预算上限</b>，只转最没把握的 q%。</p><table class=""><thead><tr><th>转人工比例</th><th>准确率</th><th>宏F1</th><th>代价/千张</th><th>待复核召回</th><th></th></tr></thead><tbody><tr><td>0%</td><td>0.7612</td><td>0.6211</td><td>2753.4</td><td>0.211</td><td></td></tr><tr><td>5%</td><td>0.7560</td><td>0.6375</td><td>2579.9</td><td>0.316</td><td> ← 推荐</td></tr><tr><td>10%</td><td>0.7251</td><td>0.6122</td><td>2488.0</td><td>0.333</td><td></td></tr><tr><td>15%</td><td>0.6976</td><td>0.6008</td><td>2422.7</td><td>0.386</td><td></td></tr><tr><td>20%</td><td>0.6735</td><td>0.5867</td><td>2310.1</td><td>0.404</td><td></td></tr><tr><td>30%</td><td>0.6289</td><td>0.5675</td><td>1896.0</td><td>0.491</td><td></td></tr></tbody></table><p class="muted">本表由 <code>tools/build_ab.py</code> 从 out/pred_test.json 现算。q 越大代价越低但准确率与宏 F1 都下滑，那是用人工换指标，应由工厂按复核成本决定，不该由算法替你选。</p><h2><span class="n">十</span>失败案例：模型在哪儿翻车</h2><p>测试集 582 张里错了 <b>139</b> 张（23.9%）。按<b>业务代价</b>排序，最危险的错是"判废被判成合格"。</p><table class=""><thead><tr><th>错误类型</th><th>张数</th><th>占全部错误</th></tr></thead><tbody><tr><td>判废→合格</td><td>68</td><td>48.9%</td></tr><tr><td>待复核→合格</td><td>43</td><td>30.9%</td></tr><tr><td>合格→判废</td><td>11</td><td>7.9%</td></tr><tr><td>合格→待复核</td><td>9</td><td>6.5%</td></tr><tr><td>判废→待复核</td><td>6</td><td>4.3%</td></tr><tr><td>待复核→判废</td><td>2</td><td>1.4%</td></tr></tbody></table><p>下面 9 张是按代价排在最前面的错例，点按钮看原图与热力图：</p>
+<div class="viewer" id="v3">
+  <div class="vstage"><img id="v3_img" alt=""></div>
+  <div class="vside">
+    <div class="vbtns">
+      <button class="vbtn on" data-mode="orig">原图</button>
+      <button class="vbtn" data-mode="gt">数据集真值</button>
+      <button class="vbtn" data-mode="pred">模型预测</button>
+    </div>
+    <div class="vmeta" id="v3_meta"></div>
+    <div class="vnav">
+      <button id="v3_prev">← 上一张</button>
+      <span id="v3_idx"></span>
+      <button id="v3_next">下一张 →</button>
+    </div>
+    <div class="vhint">键盘 ← → 翻页；按钮切换三视图</div>
+  </div>
+</div>
+<script>
+(function(){
+  const D = [{"orig": "assets/orig_fail_01.jpg", "gt": "assets/gt_fail_01.jpg", "pred": "assets/pred_fail_01.jpg", "true": "判废", "predcn": "合格", "conf": 0.6001046895980835, "name": "fail_01", "ok": false}, {"orig": "assets/orig_fail_02.jpg", "gt": "assets/gt_fail_02.jpg", "pred": "assets/pred_fail_02.jpg", "true": "判废", "predcn": "合格", "conf": 0.8185350298881531, "name": "fail_02", "ok": false}, {"orig": "assets/orig_fail_03.jpg", "gt": "assets/gt_fail_03.jpg", "pred": "assets/pred_fail_03.jpg", "true": "判废", "predcn": "合格", "conf": 0.8908722400665283, "name": "fail_03", "ok": false}, {"orig": "assets/orig_fail_04.jpg", "gt": "assets/gt_fail_04.jpg", "pred": "assets/pred_fail_04.jpg", "true": "判废", "predcn": "合格", "conf": 0.7284555435180664, "name": "fail_04", "ok": false}, {"orig": "assets/orig_fail_05.jpg", "gt": "assets/gt_fail_05.jpg", "pred": "assets/pred_fail_05.jpg", "true": "判废", "predcn": "合格", "conf": 0.5994318127632141, "name": "fail_05", "ok": false}, {"orig": "assets/orig_fail_06.jpg", "gt": "assets/gt_fail_06.jpg", "pred": "assets/pred_fail_06.jpg", "true": "判废", "predcn": "合格", "conf": 0.632534384727478, "name": "fail_06", "ok": false}, {"orig": "assets/orig_fail_07.jpg", "gt": "assets/gt_fail_07.jpg", "pred": "assets/pred_fail_07.jpg", "true": "判废", "predcn": "合格", "conf": 0.5903522372245789, "name": "fail_07", "ok": false}, {"orig": "assets/orig_fail_08.jpg", "gt": "assets/gt_fail_08.jpg", "pred": "assets/pred_fail_08.jpg", "true": "判废", "predcn": "合格", "conf": 0.7165421843528748, "name": "fail_08", "ok": false}, {"orig": "assets/orig_fail_09.jpg", "gt": "assets/gt_fail_09.jpg", "pred": "assets/pred_fail_09.jpg", "true": "判废", "predcn": "合格", "conf": 0.6045467257499695, "name": "fail_09", "ok": false}], root = document.getElementById("v3");
+  let i = 0, mode = "orig";
+  const img = document.getElementById("v3_img");
+  const meta = document.getElementById("v3_meta");
+  const idx = document.getElementById("v3_idx");
+  function render() {
+    const d = D[i];
+    img.src = d[mode];
+    idx.textContent = (i + 1) + " / " + D.length;
+    const ok = d.ok ? '<span class="ok">判定正确</span>' : '<span class="bad">判定错误</span>';
+    meta.innerHTML = `<div class="vk">真值</div><div class="vv">${d.true}</div>
+      <div class="vk">预测</div><div class="vv">${d.predcn} <b>${d.conf.toFixed(2)}</b></div>
+      <div>${ok}</div>`;
+  }
+  root.querySelectorAll(".vbtn").forEach(b => b.onclick = () => {
+    root.querySelectorAll(".vbtn").forEach(x => x.classList.remove("on"));
+    b.classList.add("on"); mode = b.dataset.mode; render();
+  });
+  document.getElementById("v3_prev").onclick = () => { i = (i - 1 + D.length) % D.length; render(); };
+  document.getElementById("v3_next").onclick = () => { i = (i + 1) % D.length; render(); };
+  window.addEventListener("keydown", e => {
+    if (e.key === "ArrowLeft") { i = (i - 1 + D.length) % D.length; render(); }
+    if (e.key === "ArrowRight") { i = (i + 1) % D.length; render(); }
+  });
+  render();
+})();
+</script><div class="note">看完这些错例要承认一件事：模型学到的不完全是"缺陷的局部形态"，很大程度上是<b>整片电池的明暗</b>。所以同色浅缺陷、油膜覆盖、跨视野裂纹这三类它必然弱。这不是调参能解决的，需要更好的成像或检测式模型。</div><h2><span class="n">十一</span>从「分级」到「处置动作」</h2><p>分级如果落不到动作上，就只是给数据集编了个号。三档对应的动作是：</p><table class=""><thead><tr><th>输出</th><th>产线动作</th><th>谁执行</th></tr></thead><tbody><tr><td><b>合格</b></td><td>正常流转，不干预</td><td>自动</td></tr><tr><td><b>待复核</b></td><td>返修 / 降级，或人工看一眼</td><td>复核岗</td></tr><tr><td><b>判废</b></td><td>剔除，登记不良品</td><td>自动 + 质检</td></tr></tbody></table><p>配合拒识策略，系统实际有三条出口：<b>自动放行、自动剔除、推人工</b>。这样它就不是"一个打分器"，而是"一个能决定下一步谁来做的东西"。</p><h2><span class="n">十二</span>局限与后续计划</h2><div class="grid g2"><div class="card warn"><h3>必须承认的五条</h3><ol><li>分级档位不是行业判废标准；</li><li>组件分组是近似还原（k-means），不能保证零泄漏；</li><li>没有缺陷类型，只有严重度；</li><li>单晶/多晶混合训练，未分型建模；</li><li><b>跨组件泛化是真正的瓶颈</b>：训练损失 0.18、验证损失 1.34，模型在记训练组件。</li></ol></div><div class="card ok"><h3>下一步三件事</h3><ol><li>找一家组件厂拿真实判废记录，用他们的档位重新标标签；</li><li>补采「待复核」这一类（目前只有 57 张测试样本）；</li><li>把分类模型换成检测/分割式监督，让热力图能给出缺陷轮廓，而不只是注意力。</li></ol></div></div><h2><span class="n">十三</span>文件清单与复现命令</h2><pre><code>pv-demo/
+├── models/   pv_el_yolov8s_cls.onnx（20.3 MB，不需要 torch）
+├── demo/     7 张精挑演示图 + 标签
+├── demo2/    60 张扩展测试图 + 标签
+├── fails/    9 张代价最高的错例
+├── train/ valid/ test/   全量 2624 张与标签
+├── out/      pred_*.json / metrics_*.json / ab.json / failures.json
+├── tools/    推理、评估、渲染、建网页
+├── web/      本报告与三视图素材
+└── docs/     答辩 PPT
+</code></pre><p>复现全部数字：</p><pre><code>python run.py --all</code></pre><footer>
+<p>光伏电池片 EL 缺陷分级 · 技术报告（离线单文件，不依赖网络）<br>
+数据：ELPV Dataset（CC-BY-NC-SA-4.0）· 代码：MIT · 模型：YOLOv8s-cls 导出 ONNX<br>
+报告中的所有数字来源于 out/*.json，可在 <code>python run.py --all</code> 后重建。
+</p></footer>
+</div></body></html>
