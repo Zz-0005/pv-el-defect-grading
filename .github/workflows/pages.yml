@@ -1,0 +1,45 @@
+name: Deploy web report to Pages
+
+# 只发布交付包里的离线技术报告（delivery/pv-demo/web），
+# 不碰仓库其他内容。改动这个目录、或手动触发时重新部署。
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "delivery/pv-demo/web/**"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check web report exists
+        run: |
+          test -f delivery/pv-demo/web/index.html || {
+            echo "缺少 delivery/pv-demo/web/index.html"; exit 1; }
+          echo "素材文件数: $(find delivery/pv-demo/web/assets -type f | wc -l)"
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: delivery/pv-demo/web
+
+      - id: deployment
+        uses: actions/deploy-pages@v4
