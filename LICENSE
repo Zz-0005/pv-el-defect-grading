@@ -2,6 +2,23 @@ MIT License
 
 Copyright (c) 2026 AI 机器视觉工程师订单班
 
+---------------------------------------------------------------------------
+适用范围说明（重要）
+---------------------------------------------------------------------------
+本 MIT 许可只覆盖本仓库的**自有代码**：src/、scripts/、delivery/pv-demo/tools/
+以及文档与报告。
+
+以下内容**不在**本许可范围内：
+
+1. 数据集：ELPV Dataset, CC-BY-NC-SA-4.0, (c) Buerhop-Lutz et al.
+   "A Benchmark for Visual Identification of Defective Solar Cells in
+    Electroluminescence Imagery", EU PVSEC 2018. 仅限非商业的教学与研究用途。
+
+2. 模型权重：delivery/pv-demo/models/*.onnx 由 Ultralytics YOLOv8 微调并导出。
+   Ultralytics YOLOv8 采用 AGPL-3.0（https://ultralytics.com/license），
+   因此该权重及其衍生文件按 AGPL-3.0 处理。商业使用需另行取得 Ultralytics 授权。
+---------------------------------------------------------------------------
+
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
@@ -19,6 +36,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
----------------------------------------------------------------------------
-数据集：ELPV Dataset, CC-BY-NC-SA-4.0, (c) Buerhop-Lutz et al. — 见 README 引用

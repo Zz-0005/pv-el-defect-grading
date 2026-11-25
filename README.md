@@ -151,8 +151,14 @@ python -m pvinspect selftest     # 23 项
 - **数据**：[ELPV Dataset](https://github.com/zae-bayern/elpv-dataset)
   （Buerhop-Lutz 等，EU PVSEC 2018），**CC-BY-NC-SA-4.0**，仅用于教学与研究。
   2624 张 300×300 真实电致发光图像，来自 44 块真实组件。
-- **代码**：MIT（见 [`LICENSE`](LICENSE)）。
-- 本仓库**不包含** ELPV 图像；交付包里的 `demo`/`demo2`/`fails` 仅保留少量样例用于演示。
+- **本仓库自有代码**（`src/`、`scripts/`、`delivery/pv-demo/tools/` 等）：MIT，见 [`LICENSE`](LICENSE)。
+- **模型权重**（`delivery/pv-demo/models/*.onnx`）：由 **Ultralytics YOLOv8** 微调并导出。
+  Ultralytics YOLOv8 采用 **AGPL-3.0**，因此该权重及其衍生文件按 AGPL-3.0 处理，
+  不在 MIT 范围内。用于教学与个人作品展示；商用需另行取得 Ultralytics 的商业授权。
+- 本仓库**不包含** ELPV 原始图像；交付包里的 `demo`/`demo2`/`fails` 仅保留少量样例用于演示。
+
+> 如需纯 MIT 的版本，可只保留 `src/` 与 `scripts/`（不包含任何 YOLOv8 权重），
+> 训练时由 ultralytics 自行下载预训练权重。
 
 ## 引用
 
