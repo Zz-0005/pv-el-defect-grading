@@ -17,13 +17,13 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
-sys.path.insert(0, r"F:\展示作品\_archive_废弃稿")
 
 from pptx import Presentation  # noqa: E402
 from pptx.util import Inches  # noqa: E402
 from pptx.dml.color import RGBColor  # noqa: E402
 from pptx.enum.text import PP_ALIGN  # noqa: E402
 
+# deck_style.py 放在同目录，保证别人 clone 下来也能重建 PPT
 from deck_style import (  # noqa: E402
     INK, INK_SOFT, MUTED, LINE, SOFT, SOFT2, WHITE, ACCENT, ACCENT_L, AMBER, AMBER_L, DARK,
     simple, rect, hline, add_table, slide_header, slide_footer, set_notes,
